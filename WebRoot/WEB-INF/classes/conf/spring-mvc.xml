@@ -29,6 +29,6 @@
 	</bean>
 
 	<!-- 扫描包 -->
-	<context:component-scan base-package="cn.going.controllor" />
-	<context:component-scan base-package="cn.going.interceptor" />
+	<context:component-scan base-package="cn.going" />
+	
 </beans>
