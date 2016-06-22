@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="keywords" content="jquery,ui,easy,easyui,web">
+<meta name="description"
+	content="easyui help you build your web page easily!">
+<title>请登录</title>
+
+<link rel="stylesheet" type="text/css"
+	href="js/easyUI/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="js/easyUI/themes/icon.css">
+<link rel="stylesheet" type="text/css" href="js/easyUI/demo/demo.css">
+<script type="text/javascript" src="js/easyUI/jquery.min.js"></script>
+<script type="text/javascript" src="js/easyUI/jquery.easyui.min.js"></script>
+<script type="text/javascript"
+	src="js/easyUI/locale/easyui-lang-zh_CN.js"></script>
+
+
+
+<script type="text/javascript">
+	var url;
+	var mesTitle;
+	function addRole() {
+		$('#dlg').dialog('open').dialog('setTitle', '新增用户');
+		$('#fm').form('clear');
+
+		mesTitle = '创建角色成功';
+	}
+
+	function editRole() {
+		var rows = $('#datagrid').datagrid('getSelections');
+
+		if (rows.length != 1) {
+			$.messager.alert('提示', '请一个要编辑的记录！', 'error');
+			return false;
+		}
+
+		//	var row = $('#datagrid').datagrid('getSelected');
+		var queryquery_id = rows[0].role_id;
+
+		$('#updaterole_id').val(queryquery_id);
+		$('#update-dlg').dialog('open').dialog('setTitle', '编辑用户');
+		$('#updatefm').form('load', rows[0]);//这句话有问题，第一次加载时正确的，第二次就出错了，还保持第一次的数据
+
+		mesTitle = '更新角色成功';
+
+	}
+	function updateRole() {
+
+		$('#updatefm').form('submit', {
+
+			url : "updateRole.do",
+			onSubmit : function() {
+				return $(this).form('validate');
+			},
+			success : function(result) {
+				/* console.info(result); */
+				var result = eval('(' + result + ')');
+				if (result.success) {
+					$('#dlg').dialog('close');
+					$('#datagrid').datagrid('reload');
+				} else {
+					mesTitle = '创建角色失败';
+				}
+				$.messager.show({
+					title : mesTitle,
+					msg : result.msg
+				});
+			}
+		});
+	}
+	//初始化
+	function role_auth() {
+		
+		var rows = $('#datagrid').datagrid('getSelections');
+
+		if (rows.length != 1) {
+			alert("请选择一个用户进行操作");
+			return false;
+		}
+		var queryrole_id = rows[0].role_id;
+
+		$('#role_auth_role_name').html(rows[0].role_name);	
+		$('#role_auth_role_id').val(queryrole_id);
+		$('#role_auth_auth_id').combotree({
+			url : 'getAuth_Tree.do?role_id=' + queryrole_id
+		});
+
+
+		
+		$('#role_auth').dialog('open').dialog('setTitle', '分配权限');
+
+		mesTitle = '新增用户成功';
+	}
+
+	function saveRole() {
+		$('#fm').form('submit', {
+
+			url : "createRole.do",
+			onSubmit : function() {
+				return $(this).form('validate');
+			},
+			success : function(result) {
+				/* console.info(result); */
+				var result = eval('(' + result + ')');
+				if (result.success) {
+					$('#dlg').dialog('close');
+					$('#datagrid').datagrid('reload');
+				} else {
+					mesTitle = '创建角色失败';
+				}
+				$.messager.show({
+					title : mesTitle,
+					msg : result.msg
+				});
+			}
+		});
+	}
+	function authorize() {
+
+		var url = "saveorupdateAuth_Role.do?role_id="
+				+ $('#role_auth_auth_id').val() + "&auth_ids="
+				+ $('#role_auth_role_id').combobox('getValues') + "";
+
+		$('#role_authf').form('submit', {
+			url : url,
+			onSubmit : function() {
+				return $(this).form('validate');
+			},
+			success : function(result) {
+				/* console.info(result); */
+				var result = eval('(' + result + ')');
+				if (result.success) {
+					$('#dlg').dialog('close');
+					$('#datagrid').datagrid('reload');
+				} else {
+					mesTitle = '新增用户失败';
+				}
+				$.messager.show({
+					title : mesTitle,
+					msg : result.msg
+				});
+			}
+		});
+	}
+
+	function doSearch() {
+
+		$('#datagrid').datagrid('load', {
+			role_name : $('#query_role_name').val(),
+
+		});
+	}
+	function deleteRole() {
+
+		var ids = [];
+		var rows = $('#datagrid').datagrid('getSelections');
+		for (var i = 0; i < rows.length; i++) {
+			ids.push(rows[i].role_id);
+		}
+		if (ids.length == 0) {
+			alert("请选择角色");
+			return false;
+
+		}
+		$.messager.confirm('提示', '您确定要删除吗？', function(r) {
+			if (r) {
+				$('#role_authf').form('submit', {
+					url : "removeRole.do?role_id=" + ids.join(","),
+					onSubmit : function() {
+						return $(this).form('validate');
+					},
+					success : function(result) {
+						/* console.info(result); */
+						var result = eval('(' + result + ')');
+						if (result.success) {
+							$('#dlg').dialog('close');
+							$('#datagrid').datagrid('reload');
+						} else {
+							mesTitle = '新增用户失败';
+						}
+						$.messager.show({
+							title : mesTitle,
+							msg : result.msg
+						});
+					}
+				});
+			}
+		});
+	}
+</script>
+</head>
+
+
+
+
+<body class="easyui-layout" fit="true">
+	<div region="center" border="false" style="overflow: hidden;">
+		<div id="tb" style="padding:5px;height:auto">
+
+			<div>
+				<span>角色名称:</span> <input id="query_role_name"
+					class="easyui-textbox"> <a href="#"
+					class="easyui-linkbutton" data-options="iconCls:'icon-search'"
+					onclick="doSearch()" style="width:80px">搜索</a>
+			</div>
+		</div>
+		<!-- 用户信息列表 -->
+
+		<table class="easyui-datagrid" title="角色列表" id="datagrid"
+			style="width:700px;height:250px" fit="true" pagination="true"
+			toolbar="#toolbar"
+			data-options="rownumbers:true  , collapsible:true,url:'getRoleList.do',method:'post'">
+			<thead>
+				<tr>
+					<th data-options="field:'role_id',checkbox:true"></th>
+
+					<th data-options="field:'role_name',width:100">角色名称</th>
+
+
+
+				</tr>
+			</thead>
+		</table>
+		<!-- 按钮 -->
+		<div id="toolbar">
+			<a href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-add" plain="true" onclick="addRole();">新增角色</a> <a
+				href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-edit" plain="true" onclick="editRole();">编辑角色</a> <a
+				href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-remove" plain="true" onclick="deleteRole();">删除角色</a>
+
+			<a href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-remove" plain="true" onclick="role_auth();">权限分配</a>
+		</div>
+
+		<!-- 对话框 -->
+		<div id="dlg" class="easyui-dialog"
+			style="width:400px;height:280px;padding:10px 20px" closed="true"
+			buttons="#dlg-buttons">
+			<div class="ftitle">新增角色</div>
+			<form id="fm" method="post" novalidate>
+				<div class="fitem">
+					<label>角色名:</label> <input name="role_name" class="easyui-textbox"
+						required="true">
+				</div>
+
+			</form>
+		</div>
+
+		<!-- 对话框 -->
+		<div id="update-dlg" class="easyui-dialog"
+			style="width:400px;height:280px;padding:10px 20px" closed="true"
+			buttons="#updatedlg-buttons">
+			<div class="ftitle">修改角色</div>
+
+			<form id="updatefm" method="post" novalidate>
+
+				<div class="fitem">
+					<label>角色名:</label> <input name="role_name" class="easyui-textbox"
+						required="true"> <input type="hidden" name="role_id"
+						id="updaterole_id">
+				</div>
+
+			</form>
+		</div>
+		<!-- 对话框按钮 -->
+		<div id="updatedlg-buttons">
+			<a href="javascript:void(0)" class="easyui-linkbutton c6"
+				iconCls="icon-ok" onclick="updateRole()" style="width:90px">修改角色</a>
+			<a href="javascript:void(0)" class="easyui-linkbutton"
+				iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')"
+				style="width:90px">取消</a>
+		</div>
+
+
+
+		<div id="role_auth" class="easyui-dialog"
+			style="width:400px;height:280px;padding:10px 20px" closed="true"
+			buttons="#role_auth-buttons">
+			<div class="ftitle">分配权限</div>
+			<label id="role_auth_role_name"> </label>
+			<input type="hidden" name="user_id" id="role_user_user_id"
+						readonly="readonly">
+			<form id="role_authf" method="post" novalidate>
+				<div class="fitem">
+					 DB编码: 
+						<input class="easyui-combotree"
+						name="auth_id" id="role_auth_auth_id" multiple
+						style="width:200px;" data-options="url:'',method:'get'">
+				</div>
+
+			</form>
+		</div>
+
+
+
+		<!-- 对话框按钮 -->
+		<div id="dlg-buttons">
+			<a href="javascript:void(0)" class="easyui-linkbutton c6"
+				iconCls="icon-ok" onclick="saveRole()" style="width:90px">创建角色</a> <a
+				href="javascript:void(0)" class="easyui-linkbutton"
+				iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')"
+				style="width:90px">取消</a>
+		</div>
+
+		<!-- 对话框按钮 -->
+		<div id="role_auth-buttons">
+			<a href="javascript:void(0)" class="easyui-linkbutton c6"
+				iconCls="icon-ok" onclick="authorize()" style="width:90px">分配</a> <a
+				href="javascript:void(0)" class="easyui-linkbutton"
+				iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')"
+				style="width:90px">取消</a>
+		</div>
+	</div>
+
+
+</body>
+</html>

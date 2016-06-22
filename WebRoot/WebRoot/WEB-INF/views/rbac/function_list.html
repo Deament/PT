@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="keywords" content="jquery,ui,easy,easyui,web">
+<meta name="description"
+	content="easyui help you build your web page easily!">
+<title>权限管理</title>
+
+<link rel="stylesheet" type="text/css"
+	href="js/easyUI/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="js/easyUI/themes/icon.css">
+<link rel="stylesheet" type="text/css" href="js/easyUI/demo/demo.css">
+<script type="text/javascript" src="js/easyUI/jquery.min.js"></script>
+<script type="text/javascript" src="js/easyUI/jquery.easyui.min.js"></script>
+<script type="text/javascript"
+	src="js/easyUI/locale/easyui-lang-zh_CN.js"></script>
+
+<script type="text/javascript">
+	var url;
+	var mesTitle;
+	function addUser() {
+		$('#dlg').dialog('open').dialog('setTitle', '新增用户');
+		$('#fm').form('clear');
+		url = path + "/user/addUser";
+		mesTitle = '新增用户成功';
+	}
+
+	function editUser() {
+		var row = $('#datagrid').datagrid('getSelected');
+
+		if (row) {
+			var id = row.id;
+
+			$('#dlg').dialog('open').dialog('setTitle', '编辑用户');
+			$('#fm').form('load', row);//这句话有问题，第一次加载时正确的，第二次就出错了，还保持第一次的数据
+			url = path + "/user/editUser?id=" + id;
+			mesTitle = '编辑用户成功';
+		} else {
+			$.messager.alert('提示', '请选择要编辑的记录！', 'error');
+		}
+	}
+
+	function role_auth() {
+
+		var row = $('#datagrid').datagrid('getSelected');
+		var role_id = row.role_id;
+
+		$('#role_auth_auth_id').val(role_id);
+
+		$('#role_auth').dialog('open').dialog('setTitle', '分配角色');
+
+		mesTitle = '新增用户成功';
+	}
+
+	function saveUser() {
+		$('#fm').form('submit', {
+
+			url : "createFunction.do",
+			onSubmit : function() {
+				return $(this).form('validate');
+			},
+			success : function(result) {
+				/* console.info(result); */
+				var result = eval('(' + result + ')');
+				if (result.success) {
+					$('#dlg').dialog('close');
+					$('#datagrid').datagrid('reload');
+				} else {
+					mesTitle = '新增用户失败';
+				}
+				$.messager.show({
+					title : mesTitle,
+					msg : result.msg
+				});
+			}
+		});
+	}
+	function authorize() {
+
+		var url = "saveorupdateAuth_Role.do?role_id="
+				+ $('#role_auth_auth_id').val() + "&auth_ids="
+				+ $('#role_auth_role_id').combobox('getValues') + "";
+		alert(url);
+		$('#role_authf').form('submit', {
+			url : url,
+			onSubmit : function() {
+				return $(this).form('validate');
+			},
+			success : function(result) {
+				/* console.info(result); */
+				var result = eval('(' + result + ')');
+				if (result.success) {
+					$('#dlg').dialog('close');
+					$('#datagrid').datagrid('reload');
+				} else {
+					mesTitle = '新增用户失败';
+				}
+				$.messager.show({
+					title : mesTitle,
+					msg : result.msg
+				});
+			}
+		});
+	}
+</script>
+
+</head>
+
+<body class="easyui-layout" fit="true">
+	<div region="center" border="false" style="overflow: hidden;">
+		<!-- 用户信息列表 -->
+
+		<table class="easyui-datagrid" title="权限列表" id="datagrid"
+			style="width:700px;height:250px" fit="true" pagination="false"
+			toolbar="#toolbar"
+			data-options="singleSelect:true,collapsible:true,url:'getFuctionList.do',method:'get'">
+			<thead>
+				<tr>
+					<th data-options="field:'function_id',width:80">DB编码</th>
+					<th data-options="field:'function_name',width:100">功能名称</th>
+					<th data-options="field:'function_code',width:80,align:'right'">功能代码
+					</th>
+					<th data-options="field:'function_parentid',width:100">父级功能</th>
+	
+
+
+
+
+					
+					<th data-options="field:'function_url',width:100">功能链接</th>
+
+
+
+				</tr>
+			</thead>
+		</table>
+		<!-- 对话框 -->
+		<div id="dlg" class="easyui-dialog"
+			style="width:400px;height:280px;padding:10px 20px" closed="true"
+			buttons="#dlg-buttons">
+			<div class="ftitle">新增功能</div>
+			<form id="fm" method="post" novalidate>
+				<div class="fitem">
+					<label>功能名:</label> <input name="function_name"
+						class="easyui-textbox" id="add_function_name" required="true">
+				</div>
+				<div class="fitem">
+					<label>链接地址:</label> <input name="function_url"
+						class="easyui-textbox" id="add_function_url" required="true">
+				</div>
+				<div class="fitem">
+					<label>功能代码:</label> <input name="function_code"
+						id="add_function_code" class="easyui-textbox">
+				</div>
+
+			</form>
+		</div>
+
+		<!-- 按钮 -->
+		<div id="toolbar">
+			<a href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-add" plain="true" onclick="addUser();">新增功能</a> <a
+				href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-edit" plain="true" onclick="editUser();">编辑功能</a> <a
+				href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-remove" plain="true" onclick="deleteUser();">删除功能</a>
+
+		</div>
+
+
+		<!-- 对话框按钮 -->
+		<div id="dlg-buttons">
+			<a href="javascript:void(0)" class="easyui-linkbutton c6"
+				iconCls="icon-ok" onclick="saveUser()" style="width:90px">保存</a> <a
+				href="javascript:void(0)" class="easyui-linkbutton"
+				iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')"
+				style="width:90px">取消</a>
+		</div>
+
+
+
+
+
+	</div>
+
+</body>
+</html>

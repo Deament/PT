@@ -1,0 +1,85 @@
+<html>
+  <head>
+    <title>Select.html</title>
+    <meta http-equiv="keywords" content="keyword1,keyword2,keyword3">
+    <meta http-equiv="description" content="this is my page">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <link rel="stylesheet" href="css.css" type="text/css"></link>
+    <script type="text/javascript" src="js/easyUI/jquery.min.js"></script>
+    <script type="text/javascript" src="js/webjs/selectOption.js"></script>
+  </head>
+
+  <body>
+    <table align="center" cellpadding="0" cellspacing="0">
+      <tr>
+        <td>
+          可选择表项
+        </td>
+        <td></td>
+        <td>
+          已选择表项
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <select multiple="multiple" id="leftselect" name="leftselect"
+            style="width: 100px; height: 160px;">
+            <option value="1">
+              选项1
+            </option>
+            <option value="2">
+              选项2
+            </option>
+            <option value="3">
+              选项3
+            </option>
+            <option value="4">
+              选项4
+            </option>
+            <option value="5">
+              选项5
+            </option>
+            <option value="6">
+              选项6
+            </option>
+            <option value="7">
+              选项7
+            </option>
+            <option value="8">
+              选项8
+            </option>
+          </select>
+
+        </td>
+        <td>
+          <input type="button" class="button" id="add" value="选中向右">
+          <br>
+          <input type="button" class="button" id="remove" value="选中向左">
+          <br>
+          <input type="button" class="button" id="alladd" value="全部向右">
+          <br>
+          <input type="button" class="button" id="allremove" value="全部向左">
+        </td>
+        <td>
+          <select multiple="multiple" id="rightselect" name="rightselect"
+            style="width: 100px; height: 160px;">
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td align="center">
+          <input id="left_up" class="button" type="button" value="向上" />
+             
+          <input id="left_down" class="button" type="button" value="向下" />
+        </td>
+        <td></td>
+        <td align="center">
+          <input id="right_up" class="button" type="button" value="向上" />
+             
+          <input id="right_down" class="button" type="button" value="向下" />
+        </td>
+      </tr>
+    </table>
+
+  </body>
+</html>

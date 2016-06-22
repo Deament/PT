@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="keywords" content="jquery,ui,easy,easyui,web">
+<meta name="description"
+	content="easyui help you build your web page easily!">
+<title>用户管理</title>
+
+<link rel="stylesheet" type="text/css"
+	href="js/easyUI/themes/default/easyui.css">
+<!--  -->
+<link rel="stylesheet" type="text/css" href="js/easyUI/themes/icon.css">
+<link rel="stylesheet" type="text/css" href="js/easyUI/demo/demo.css">
+<script type="text/javascript" src="js/easyUI/jquery.min.js"></script>
+<script type="text/javascript" src="js/easyUI/jquery.easyui.min.js"></script>
+<script type="text/javascript"
+	src="js/easyUI/locale/easyui-lang-zh_CN.js"></script>
+
+<script type="text/javascript">
+	//var url;
+	var mesTitle;
+	function addUser() {
+		$('#dlg').dialog('open').dialog('setTitle', '新增用户');
+		$('#fm').form('clear');
+		url = path + "/user/addUser";
+		mesTitle = '创建用户成功';
+	}
+
+	function saveUser() {
+
+		$('#fm').form('submit', {
+			url : "adduser.do",
+			onSubmit : function() {
+				return $(this).form('validate');
+			},
+			success : function(result) {
+
+				var result = eval('(' + result + ')');
+				if (result.success) {
+					$('#dlg').dialog('close');
+					$('#datagrid').datagrid('reload');
+				} else {
+					mesTitle = '创建用户失败';
+				}
+				$.messager.show({
+					title : mesTitle,
+					msg : result.msg
+				});
+			}
+		});
+	}
+	//禁用用户 
+	function abanUser() {
+		var ids = [];
+		var rows = $('#datagrid').datagrid('getSelections');
+		for (var i = 0; i < rows.length; i++) {
+			ids.push(rows[i].user_id);
+		}
+
+		if (ids.length == 0) {
+			alert("请选择用户");
+			return false;
+
+		}
+
+		if (rows) {
+			$.messager.confirm('提示', '您确定要封锁该用户吗？', function(r) {
+				if (r) {
+					$('#fm').form('submit', {
+						url : "abaneuser.do?user_id=" + ids.join(","),
+						onSubmit : function() {
+						},
+						//判断结果是否正确  
+						success : function(result) {
+							var result = eval('(' + result + ')');
+							if (result.success) {
+								$('#dlg').dialog('close');
+								$('#datagrid').datagrid('reload');
+							} else {
+								mesTitle = '封锁失败';
+							}
+							$.messager.show({
+								title : mesTitle,
+								msg : result.msg
+							});
+
+						}
+					});
+				}
+			});
+		}
+
+	}
+
+	//禁用用户 
+	function disabanUser() {
+
+		var ids = [];
+		var rows = $('#datagrid').datagrid('getSelections');
+		for (var i = 0; i < rows.length; i++) {
+			ids.push(rows[i].user_id);
+		}
+		if (ids.length == 0) {
+			alert("请选择用户");
+			return false;
+
+		}
+
+		if (rows) {
+			$.messager.confirm('提示', '您确定要解锁吗？', function(r) {
+				if (r) {
+					$('#fm').form('submit', {
+						url : "disabaneuser.do?user_id=" + ids.join(","),
+						onSubmit : function() {
+						},
+						//判断结果是否正确  
+						success : function(result) {
+							var result = eval('(' + result + ')');
+							if (result.success) {
+								$('#dlg').dialog('close');
+								$('#datagrid').datagrid('reload');
+							} else {
+								mesTitle = '封锁失败';
+							}
+							$.messager.show({
+								title : mesTitle,
+								msg : result.msg
+							});
+
+						}
+					});
+				}
+			});
+		}
+
+	}
+
+	function authorize() {
+
+		var url = "saveorupdateRole_User.do?user_id="
+				+ $('#role_user_user_id').val() + "&role_id="
+				+ $('#role_user_role_id').combobox('getValues') + "";
+	
+		$('#role_userf').form('submit', {
+			url : url,
+			onSubmit : function() {
+				return $(this).form('validate');
+			},
+			success : function(result) {
+
+				var result = eval('(' + result + ')');
+				if (result.success) {
+					$('#dlg').dialog('close');
+					$('#datagrid').datagrid('reload');
+				} else {
+					mesTitle = '创建角色关联失败';
+				}
+				$.messager.show({
+					title : mesTitle,
+					msg : result.msg
+				});
+			}
+		});
+	}
+	function islock(value, row, index) {
+
+		if (value == 'yes') {
+			return "<img  src='images/IconsExtension/stop_red.png' >"
+		} else {
+			return "<img  src='images/IconsExtension/stop_green.png' >";
+		}
+		//图片你自己提供
+	}
+
+	function doSearch() {
+
+		$('#datagrid').datagrid('load', {
+			user_account : $('#query_user_account').val(),
+			user_email : $('#query_user_email').val()
+		});
+	}
+	function role_user() {
+
+		var rows = $('#datagrid').datagrid('getSelections');
+
+		if (rows.length != 1) {
+			alert("请选择一个用户进行操作");
+			return false;
+		}
+		var queryuser_id = rows[0].user_id;
+
+		$('#role_user_user_name').html(rows[0].user_account);
+		$('#role_user_user_id').val(queryuser_id);
+		$('#role_user_role_id').combotree({
+			url : 'getRole_User_Tree.do?user_id=' + queryuser_id
+		});
+		//$("#role_user_role_id").combotree('reload');
+
+		$('#role_user').dialog('open').dialog('setTitle', '分配角色');
+		mesTitle = '角色管理成功';
+	}
+</script>
+</head>
+
+
+
+
+<body class="easyui-layout" fit="true">
+
+	<div region="center" border="false" style="overflow: hidden;">
+		<!-- 用户信息列表 -->
+
+		<div id="tb" style="padding:5px;height:auto">
+
+			<div>
+				<span>用户帐号:</span> <input id="query_user_account"
+					class="easyui-textbox"> <span>电子邮箱:</span> <input
+					id="query_user_email" class="easyui-textbox"> <a href="#"
+					class="easyui-linkbutton" data-options="iconCls:'icon-search'"
+					onclick="doSearch()" style="width:80px">搜索</a>
+			</div>
+		</div>
+
+		<table class="easyui-datagrid" title="用户列表" id="datagrid"
+			style="width:700px;height:250px" fit="true" pagination="true" 
+			toolbar="#toolbar"
+		
+		data-options="rownumbers:true  ,collapsible:false,url:'getUser_List.do',method:'post'" pagination="true" >
+			<thead>
+
+				<tr>
+					<th data-options="field:'user_id',checkbox:true"></th>
+
+					<th data-options="field:'user_account',width:100">用户帐号</th>
+					<th data-options="field:'user_email',width:80,align:'right'">用户邮箱
+					</th>
+					<th data-options="field:'user_islock',width:80,align:'center' "
+						formatter='islock'>封锁状态</th>
+				</tr>
+			</thead>
+		</table>
+
+
+		<!-- 按钮 -->
+		<div id="toolbar">
+			<a href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-add" plain="true" onclick="addUser();">新增用户</a><a
+				href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-remove" plain="true" onclick="abanUser();">封锁用户</a> <a
+				href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-remove" plain="true" onclick="disabanUser();">解锁用户</a>
+			<a href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-remove" plain="true" onclick="role_user();">角色分配</a>
+		</div>
+
+		<!-- 对话框 -->
+		<div id="dlg" class="easyui-dialog"
+			style="width:400px;height:280px;padding:10px 20px" closed="true"
+			buttons="#dlg-buttons">
+			<div class="ftitle">新增用户</div>
+			<form id="fm" method="post" novalidate>
+				<div class="fitem">
+					<label>用户账号:</label> <input name="user_account"
+						class="easyui-textbox" required="true">
+				</div>
+				<div class="fitem">
+					<label>密码:</label> <input type="password" name="user_password"
+						class="easyui-textbox" required="true">
+				</div>
+				<div class="fitem">
+					<label>Email:</label> <input name="user_email"
+						class="easyui-textbox" validType="email" required="true">
+				</div>
+			</form>
+		</div>
+		<!-- 更新对话框 -->
+		<div id="updatedlg" class="easyui-dialog"
+			style="width:400px;height:280px;padding:10px 20px" closed="true"
+			buttons="#updatedlg-buttons">
+			<div class="ftitle">更新用户</div>
+			<form id="fm" method="post" novalidate>
+				<div class="fitem">
+					<label>用户账号:</label> <input name="user_account"
+						class="easyui-textbox" required="true">
+				</div>
+				
+				<div class="fitem">
+					<label>Email:</label> <input name="user_email"
+						class="easyui-textbox" validType="email" required="true">
+				</div>
+			</form>
+		</div>
+		
+		
+		<div id="role_user" class="easyui-dialog"
+			style="width:400px;height:280px;padding:10px 20px" closed="true"
+			buttons="#role_user-buttons">
+			<div class="ftitle">
+				用户帐号:<label id="role_user_user_name"> </label>
+			</div>
+
+			<input type="hidden" name="user_id" id="role_user_user_id"
+				readonly="readonly"> <br />
+			<form id="role_userf" method="post" novalidate>
+				<div class="fitem">
+
+					选择角色: <select class="easyui-combotree" name="role_id"
+						id="role_user_role_id" multiple style="width:200px;"
+						data-options="url:'',method:'get'"></select>
+
+
+
+				</div>
+
+			</form>
+		</div>
+
+
+
+		<!-- 对话框按钮 -->
+		<div id="dlg-buttons">
+			<a href="javascript:void(0)" class="easyui-linkbutton c6"
+				iconCls="icon-ok" onclick="saveUser()" style="width:90px">创建</a> <a
+				href="javascript:void(0)" class="easyui-linkbutton"
+				iconCls="icon-cancel"
+				onclick="javascript:$('#role_user').dialog('close')"
+				style="width:90px">取消</a>
+		</div>
+
+		<!-- 对话框按钮 -->
+		<div id="role_user-buttons">
+			<a href="javascript:void(0)" class="easyui-linkbutton c6"
+				iconCls="icon-ok" onclick="authorize()" style="width:90px">分配</a> <a
+				href="javascript:void(0)" class="easyui-linkbutton"
+				iconCls="icon-cancel" onclick="javascript:$('#role_user').dialog('close')"
+				style="width:90px">取消</a>
+		</div>
+
+
+
+
+
+	</div>
+
+
+</body>
+</html>

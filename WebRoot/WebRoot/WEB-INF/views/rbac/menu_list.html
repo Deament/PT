@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="keywords" content="jquery,ui,easy,easyui,web">
+<meta name="description"
+	content="easyui help you build your web page easily!">
+<title>权限管理</title>
+
+<link rel="stylesheet" type="text/css"
+	href="js/easyUI/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="js/easyUI/themes/icon.css">
+<link rel="stylesheet" type="text/css" href="js/easyUI/demo/demo.css">
+<script type="text/javascript" src="js/easyUI/jquery.min.js"></script>
+<script type="text/javascript" src="js/easyUI/jquery.easyui.min.js"></script>
+<script type="text/javascript"
+	src="js/easyUI/locale/easyui-lang-zh_CN.js"></script>
+<script type="text/javascript">
+	var url;
+	var mesTitle;
+	function addUser() {
+		$('#dlg').dialog('open').dialog('setTitle', '新增用户');
+		$('#fm').form('clear');
+
+		mesTitle = '新增用户成功';
+	}
+
+	function editUser() {
+		var row = $('#datagrid').datagrid('getSelected');
+
+		if (row) {
+			var id = row.id;
+
+			$('#dlg').dialog('open').dialog('setTitle', '编辑用户');
+			$('#fm').form('load', row);//这句话有问题，第一次加载时正确的，第二次就出错了，还保持第一次的数据
+			url = path + "/user/editUser?id=" + id;
+			mesTitle = '编辑用户成功';
+		} else {
+			$.messager.alert('提示', '请选择要编辑的记录！', 'error');
+		}
+	}
+
+	function role_user() {
+
+		var row = $('#datagrid').datagrid('getSelected');
+		var user_id = row.user_id;
+
+		$('#role_user_user_id').val(user_id);
+
+		$('#role_user').dialog('open').dialog('setTitle', '分配角色');
+
+		mesTitle = '新增用户成功';
+	}
+
+	function saveUser() {
+
+		saveurl = "createMenu.do";
+		alert(saveurl);
+		$('#fm').form(
+
+		'submit', {
+			type : 'post',
+			url : saveurl,
+			onSubmit : function() {
+				return $(this).form('validate');
+			},
+			success : function(result) {
+				/* console.info(result); */
+				var result = eval('(' + result + ')');
+				if (result.success) {
+					$('#dlg').dialog('close');
+					$('#datagrid').datagrid('reload');
+				} else {
+					mesTitle = '新增用户失败';
+
+				}
+				$.messager.show({
+					title : mesTitle,
+					msg : result.msg
+				});
+			}
+		});
+
+	}
+	function authorize() {
+
+		var url = "saveorupdateRole_User.do?user_id="
+				+ $('#role_user_user_id').val() + "&role_id="
+				+ $('#role_user_role_id').combobox('getValues') + "";
+
+		$('#role_userf').form('submit', {
+			url : url,
+			onSubmit : function() {
+				return $(this).form('validate');
+			},
+			success : function(result) {
+				/* console.info(result); */
+				var result = eval('(' + result + ')');
+				if (result.success) {
+					$('#dlg').dialog('close');
+					$('#datagrid').datagrid('reload');
+				} else {
+					mesTitle = '新增用户失败';
+				}
+				$.messager.show({
+					title : mesTitle,
+					msg : result.msg
+				});
+			}
+		});
+	}
+	function doSearch() {
+
+		$('#datagrid').datagrid('load', {
+			menu_name : $('#query_menu_name').val(),
+			menu_type : $('#query_menu_type').val()
+		});
+	}
+</script>
+</head>
+
+<body class="easyui-layout" fit="true">
+	<div region="center" border="false" style="overflow: hidden;">
+		<!-- 用户信息列表 -->
+		<div id="tb" style="padding:5px;height:auto">
+
+			<div>
+				<span>菜单名称:</span> <input id="query_menu_name"
+					class="easyui-textbox"> <span>菜单类型:</span> <input
+					id="query_menu_type" class="easyui-textbox"><a href="#"
+					class="easyui-linkbutton" data-options="iconCls:'icon-search'"
+					onclick="doSearch()" style="width:80px">搜索</a>
+			</div>
+		</div>
+		<table class="easyui-datagrid" title="权限列表" id="datagrid"
+			style="width:700px;height:250px" fit="true" pagination="false"
+			toolbar="#toolbar"
+			data-options="srownumbers:true  , collapsible:true,url:'getMenuList.do',method:'post'">
+			<thead>
+				<tr>
+					<th data-options="field:'menu_id',checkbox:true"></th>
+
+					<th data-options="field:'menu_name',width:100">菜单名称</th>
+					<th data-options="field:'menu_url',width:80,align:'right'">菜单地址
+
+
+					
+					<th data-options="field:'menu_parentid',width:100">父级菜单</th>
+					<th data-options="field:'menu_type',width:100">菜单类型</th>
+
+
+				</tr>
+			</thead>
+		</table>
+		<!-- 对话框 -->
+		<div id="dlg" class="easyui-dialog"
+			style="width:400px;height:280px;padding:10px 20px" closed="true"
+			buttons="#dlg-buttons">
+			<div class="ftitle">新增菜单</div>
+			<form id="fm" method="post" novalidate>
+				<div class="fitem">
+					<label>菜单名:</label> <input name="menu_name" class="easyui-textbox"
+						id="add_menu_name" required="true">
+				</div>
+				<div class="fitem">
+					<label>菜单地址:</label> <input name="menu_url" class="easyui-textbox"
+						id="add_menu_url" required="true">
+				</div>
+				<div class="fitem">
+					<label>父级菜单:</label> <input name="menu_parentid"
+						id="add_menu_parentid" class="easyui-textbox">
+				</div>
+				<div class="fitem">
+					<label>菜单类型:</label> <input name="menu_type" class="easyui-textbox"
+						id="add_menu_type" required="true">
+				</div>
+			</form>
+		</div>
+
+		<!-- 按钮 -->
+		<div id="toolbar">
+			<a href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-add" plain="true" onclick="addUser();">新增菜单</a> <a
+				href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-edit" plain="true" onclick="editUser();">编辑菜单</a> <a
+				href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-remove" plain="true" onclick="deleteUser();">删除菜单</a>
+
+		</div>
+
+
+		<!-- 对话框按钮 -->
+		<div id="dlg-buttons">
+			<a href="javascript:void(0)" class="easyui-linkbutton c6"
+				iconCls="icon-ok" onclick="saveUser()" style="width:90px">保存</a> <a
+				href="javascript:void(0)" class="easyui-linkbutton"
+				iconCls="icon-cancel" onclick="javascript:$('#dlg').dialog('close')"
+				style="width:90px">取消</a>
+		</div>
+
+
+
+
+
+	</div>
+
+</body>
+</html>

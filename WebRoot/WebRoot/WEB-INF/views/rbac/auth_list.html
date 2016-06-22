@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta name="keywords" content="jquery,ui,easy,easyui,web">
+<meta name="description"
+	content="easyui help you build your web page easily!">
+<title>权限管理</title>
+
+<link rel="stylesheet" type="text/css"
+	href="js/easyUI/themes/default/easyui.css">
+<link rel="stylesheet" type="text/css" href="js/easyUI/themes/icon.css">
+<link rel="stylesheet" type="text/css" href="js/easyUI/demo/demo.css">
+<script type="text/javascript" src="js/easyUI/jquery.min.js"></script>
+<script type="text/javascript" src="js/easyUI/jquery.easyui.min.js"></script>
+<script type="text/javascript"
+	src="js/easyUI/locale/easyui-lang-zh_CN.js"></script>
+
+<script type="text/javascript">
+	var url;
+	var mesTitle;
+	function addUser() {
+		$('#dlg').dialog('open').dialog('setTitle', '新增用户');
+		$('#fm').form('clear');
+		url = path + "/user/addUser";
+		mesTitle = '新增用户成功';
+	}
+
+	function editUser() {
+		var row = $('#datagrid').datagrid('getSelected');
+
+		if (row) {
+			var id = row.id;
+
+			$('#dlg').dialog('open').dialog('setTitle', '编辑用户');
+			$('#fm').form('load', row);//这句话有问题，第一次加载时正确的，第二次就出错了，还保持第一次的数据
+			url = path + "/user/editUser?id=" + id;
+			mesTitle = '编辑用户成功';
+		} else {
+			$.messager.alert('提示', '请选择要编辑的记录！', 'error');
+		}
+	}
+
+	function menu_auth() {
+
+		var row = $('#datagrid').datagrid('getSelected');
+		var auth_id = row.auth_id;
+		$('#menu_auth_auth_id').val(auth_id);
+		$('#menu_auth').dialog('open').dialog('setTitle', '分配角色');
+		mesTitle = '新增用户成功';
+	}
+
+	function function_auth() {
+		var row = $('#datagrid').datagrid('getSelected');
+		var auth_id = row.auth_id;
+		$('#function_auth_auth_id').val(auth_id);
+		$('#function_auth').dialog('open').dialog('setTitle', '分配功能');
+		mesTitle = '新增用户成功';
+	}
+	function saveAuth() {
+		$('#fm').form('submit', {
+
+			url : "createAuth.do",
+			onSubmit : function() {
+				return $(this).form('validate');
+			},
+			success : function(result) {
+				/* console.info(result); */
+				var result = eval('(' + result + ')');
+				if (result.success) {
+					$('#dlg').dialog('close');
+					$('#datagrid').datagrid('reload');
+				} else {
+					mesTitle = '新增用户失败';
+				}
+				$.messager.show({
+					title : mesTitle,
+					msg : result.msg
+				});
+			}
+		});
+	}
+	//菜单
+	function saveMenuAuth() {
+
+		url = "createAuth_Menu.do?auth_id=" + $('#menu_auth_auth_id').val()
+				+ "&menu_ids=" + $('#menu_auth_menu_id').combobox('getValues')
+				+ "";
+
+		$('#menu_authf').form('submit', {
+			url : url,
+			onSubmit : function() {
+				return $(this).form('validate');
+			},
+			success : function(result) {
+				/* console.info(result); */
+				var result = eval('(' + result + ')');
+				if (result.success) {
+					$('#dlg').dialog('close');
+					$('#datagrid').datagrid('reload');
+				} else {
+					mesTitle = '新增用户失败';
+				}
+				$.messager.show({
+					title : mesTitle,
+					msg : result.msg
+				});
+			}
+		});
+	}
+
+	function saveFunctionAuth() {
+		url = "create_Auth_Function.do?auth_id="
+				+ $('#function_auth_auth_id').val() + "&function_ids="
+				+ $('#function_auth_function_id').combobox('getValues') + "";
+
+		$('#function_authf').form('submit', {
+			url : url,
+			onSubmit : function() {
+				return $(this).form('validate');
+			},
+			success : function(result) {
+				/* console.info(result); */
+				var result = eval('(' + result + ')');
+				if (result.success) {
+					$('#dlg').dialog('close');
+					$('#datagrid').datagrid('reload');
+				} else {
+					mesTitle = '新增用户失败';
+				}
+				$.messager.show({
+					title : mesTitle,
+					msg : result.msg
+				});
+			}
+		});
+
+	}
+
+	function authorize() {
+
+		var url = "saveorupdateAuth_Role.do?role_id="
+				+ $('#role_auth_auth_id').val() + "&auth_ids="
+				+ $('#role_auth_role_id').combobox('getValues') + "";
+		alert(url);
+		$('#role_authf').form('submit', {
+			url : url,
+			onSubmit : function() {
+				return $(this).form('validate');
+			},
+			success : function(result) {
+				
+				var result = eval('(' + result + ')');
+				if (result.success) {
+					$('#dlg').dialog('close');
+					$('#datagrid').datagrid('reload');
+				} else {
+					mesTitle = '新增用户失败';
+				}
+				$.messager.show({
+					title : mesTitle,
+					msg : result.msg
+				});
+			}
+		});
+	}
+
+	function doSearch() {
+
+		$('#datagrid').datagrid('load', {
+			auth_name : $('#query_auth_name').val(),
+
+		});
+	}
+	
+	function deleteauth(){
+	
+	var ids = [];
+		var rows = $('#datagrid').datagrid('getSelections');
+		for (var i = 0; i < rows.length; i++) {
+			ids.push(rows[i].auth_id);
+		}
+		if (ids.length == 0) {
+			alert("请选择权限");
+			return false;
+
+		}
+		
+		$.messager.confirm('提示', '您确定要删除吗？', function(r) {
+			if (r) {
+				$('#menu_authf').form('submit', {
+					url : "removeAuth.do?auth_id=" + ids.join(","),
+					onSubmit : function() {
+						return $(this).form('validate');
+					},
+					success : function(result) {
+						/* console.info(result); */
+						var result = eval('(' + result + ')');
+						if (result.success) {
+							$('#dlg').dialog('close');
+							$('#datagrid').datagrid('reload');
+						} else {
+							mesTitle = '新增用户失败';
+						}
+						$.messager.show({
+							title : mesTitle,
+							msg : result.msg
+						});
+					}
+				});
+			}
+		});
+		
+		
+	}
+	//编辑初始化
+	function editAuth() {
+		var rows = $('#datagrid').datagrid('getSelections');
+
+		if (rows.length != 1) {
+			$.messager.alert('提示', '请一个要编辑的记录！', 'error');
+			return false;
+		}
+
+		//	var row = $('#datagrid').datagrid('getSelected');
+		var queryauth_id = rows[0].auth_id;
+
+		$('#updateauth_id').val(queryauth_id);
+		$('#updatedlg').dialog('open').dialog('setTitle', '编辑用户');
+		$('#updatefm').form('load', rows[0]);//这句话有问题，第一次加载时正确的，第二次就出错了，还保持第一次的数据
+
+		mesTitle = '更新角色成功';
+
+	}
+	
+	function updateAuth(){
+	
+	$('#updatefm').form('submit', {
+
+			url : "updateAuth.do",
+			onSubmit : function() {
+				return $(this).form('validate');
+			},
+			success : function(result) {
+				/* console.info(result); */
+				var result = eval('(' + result + ')');
+				if (result.success) {
+					$('#dlg').dialog('close');
+					$('#datagrid').datagrid('reload');
+				} else {
+					mesTitle = '创建角色失败';
+				}
+				$.messager.show({
+					title : mesTitle,
+					msg : result.msg
+				});
+			}
+		});
+	}
+	
+	
+	
+</script>
+
+</head>
+
+<body class="easyui-layout" fit="true">
+	<div region="center" border="false" style="overflow: hidden;">
+		<!-- 用户信息列表 -->
+		<div id="tb" style="padding:5px;height:auto">
+
+			<div>
+				<span>权限名称:</span> <input id="query_auth_name"
+					class="easyui-textbox"> <a href="#"
+					class="easyui-linkbutton" data-options="iconCls:'icon-search'"
+					onclick="doSearch()" style="width:80px">搜索</a>
+			</div>
+		</div>
+		<table class="easyui-datagrid" title="权限列表" id="datagrid"
+			style="width:700px;height:250px" fit="true" pagination="false"
+			toolbar="#toolbar"
+			data-options="rownumbers:true  , collapsible:true,url:'getAuthList.do',method:'post'">
+			<thead>
+				<tr>
+					<th data-options="field:'auth_id',checkbox:true"></th>
+
+					<th data-options="field:'auth_name',width:100">权限名称</th>
+					<th data-options="field:'auth_type',width:80,align:'right'">权限类型
+					</th>
+
+				</tr>
+			</thead>
+		</table>
+		<!-- 按钮 -->
+		<div id="toolbar">
+			<a href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-add" plain="true" onclick="addUser();">新增权限</a> <a
+				href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-edit" plain="true" onclick="editAuth();">编辑权限</a> <a
+				href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-remove" plain="true" onclick="deleteauth();">删除权限</a>
+			<a href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-remove" plain="true" onclick="menu_auth();">菜单分配</a> <a
+				href="javascript:void(0);" class="easyui-linkbutton"
+				iconCls="icon-remove" plain="true" onclick="function_auth();">功能分配</a>
+		</div>
+
+
+		<!-- 对话框 -->
+		<div id="dlg" class="easyui-dialog"
+			style="width:400px;height:280px;padding:10px 20px" closed="true"
+			buttons="#tosave-buttons">
+			<div class="ftitle">新增权限</div>
+			<form id="fm" method="post" novalidate>
+				<div class="fitem">
+					<label>权限名称:</label> <input name="auth_name" class="easyui-textbox"
+						required="true">
+				</div>
+
+				<div class="fitem">
+					<label>权限类别:</label> <input name="auth_type" class="easyui-textbox"
+						required="true">
+				</div>
+			</form>
+			<div id="#tosave-buttons">
+				<a href="javascript:void(0)" class="easyui-linkbutton c6"
+					iconCls="icon-ok" onclick="saveAuth()" style="width:90px">保存</a> <a
+					href="javascript:void(0)" class="easyui-linkbutton"
+					iconCls="icon-cancel"
+					onclick="javascript:$('#dlg').dialog('close')" style="width:90px">取消</a>
+			</div>
+		</div>
+		
+		<!-- 对话框 -->
+		<div id="updatedlg" class="easyui-dialog"
+			style="width:400px;height:280px;padding:10px 20px" closed="true"
+			buttons="#toupdate-buttons">
+			<div class="ftitle">新增权限</div>
+			<form id="updatefm" method="post" novalidate>
+			
+			<input type="hidden" name="auth_id"
+						id="updateauth_id">
+			
+				<div class="fitem">
+					<label>权限名称:</label> <input name="auth_name" class="easyui-textbox"
+						required="true">
+				</div>
+
+				<div class="fitem">
+					<label>权限类别:</label> <input name="auth_type" class="easyui-textbox"
+						required="true">
+				</div>
+			</form>
+			<div id="#touptate-buttons">
+				<a href="javascript:void(0)" class="easyui-linkbutton c6"
+					iconCls="icon-ok" onclick="updateAuth()" style="width:90px">修改</a> <a
+					href="javascript:void(0)" class="easyui-linkbutton"
+					iconCls="icon-cancel"
+					onclick="javascript:$('#updatedlg').dialog('close')" style="width:90px">取消</a>
+			</div>
+		</div>
+		
+		
+		
+
+		<div id="menu_auth" class="easyui-dialog"
+			style="width:400px;height:280px;padding:10px 20px" closed="true"
+			buttons="#menu_auth-buttons">
+			<div class="ftitle">菜单分配</div>
+			DB编码:<input type="text" name="auth_id" id="menu_auth_auth_id"
+				value="0" readonly="readonly"> <br />
+			<form id="menu_authf" method="post" novalidate>
+				<div class="fitem">
+					<label>重新分配菜单:</label> <input class="easyui-combotree"
+						name="menu_ids" id="menu_auth_menu_id" multiple
+						style="width:200px;"
+						data-options="url:'getMenu_Tree.do',method:'get'">
+				</div>
+
+			</form>
+			<!-- 对话框按钮 -->
+			<div id="menu_auth-buttons">
+				<a href="javascript:void(0)" class="easyui-linkbutton c6"
+					iconCls="icon-ok" onclick="saveMenuAuth()" style="width:90px">保存</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton"
+					iconCls="icon-cancel"
+					onclick="javascript:$('#menu_auth').dialog('close')"
+					style="width:90px">取消</a>
+			</div>
+		</div>
+
+		<div id="function_auth" class="easyui-dialog"
+			style="width:400px;height:280px;padding:10px 20px" closed="true"
+			buttons="#function_auth-buttons">
+			<div class="ftitle">功能分配</div>
+			DB编码:<input type="text" name="auth_id" id="function_auth_auth_id"
+				value="0" readonly="readonly"> <br />
+			<form id="function_authf" method="post" novalidate>
+				<div class="fitem">
+					<label>重新分配功能:</label> <input class="easyui-combotree"
+						name="function_ids" id="function_auth_function_id" multiple
+						style="width:200px;"
+						data-options="url:'getFuctionList_Tree.do',method:'get'">
+				</div>
+
+			</form>
+			<!-- 对话框按钮 -->
+			<div id="function_auth-buttons">
+				<a href="javascript:void(0)" class="easyui-linkbutton c6"
+					iconCls="icon-ok" onclick="saveFunctionAuth()" style="width:90px">保存</a>
+				<a href="javascript:void(0)" class="easyui-linkbutton"
+					iconCls="icon-cancel"
+					onclick="javascript:$('#function_auth').dialog('close')"
+					style="width:90px">取消</a>
+			</div>
+		</div>
+
+
+	</div>
+
+</body>
+</html>
