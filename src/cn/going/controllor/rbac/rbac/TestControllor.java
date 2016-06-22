@@ -13,6 +13,7 @@ public class TestControllor {
 	@RequestMapping(params ={ "action=login"})
 	public String login(HttpServletRequest request, HttpServletResponse response,
 			ModelMap modelMap) {
+		System.out.println("OK");
 		return "/login";
 	}
 
