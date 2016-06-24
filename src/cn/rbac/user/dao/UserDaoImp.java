@@ -14,6 +14,8 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import com.mysql.jdbc.Blob;
+
 import util.javaweb.Page;
 import cn.base.BaseDao;
 import cn.going.ui.model.UserI;
@@ -86,18 +88,26 @@ public class UserDaoImp extends BaseDao implements UserDao {
 			sql.append(" and " + entry.getKey() + "=? ");
 
 		}
-		getJdbcTemplate().update(sql.toString(),new PreparedStatementSetter() {
-			
+		getJdbcTemplate().update(sql.toString(), new PreparedStatementSetter() {
+
 			@Override
 			public void setValues(PreparedStatement ps) throws SQLException {
-				int count=1;
+				int count = 1;
 				for (Entry<String, Object> entry : map.entrySet()) {
-					if(   Integer instanceof   entry.getValue().getClass()){
-						
+					if (entry.getValue() instanceof Integer) {
+						ps.setInt(count++, (Integer) entry.getValue());
+					} else if (entry.getValue() instanceof String) {
+						ps.setString(count++, (String) entry.getValue());
+					} else if (entry.getValue() instanceof Float) {
+						ps.setFloat(count++, (Float) entry.getValue());
+					} else if (entry.getValue() instanceof Blob) {
+						ps.setBlob(count++, (Blob) entry.getValue());
+					} else {
+
 					}
 
 				}
-				
+
 			}
 		});
 
